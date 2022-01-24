@@ -1,10 +1,14 @@
 <ng-template #content let-modal>
   <div class="d-flex justify-content-end pt-4 pe-4">
-    <button type="button" class="close" aria-label="Close" (click)="closeModal(modal)">
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="closeModal(modal)"
+    >
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-
 
   <div class="modal-body">
     <h4 class="mb-2">Add a New Question</h4>
@@ -12,133 +16,118 @@
     <form [formGroup]="questionForm">
       <div class="row">
         <div class="col">
-
           <div class="mb-3">
             <select class="custom-select" formControlName="inputType">
-              <option value="">Choose your inputType</option>
               <ng-container *ngFor="let i of inputType">
-                <option [ngValue]="i.name">{{i.name}}</option>
+                <option [ngValue]="i.name">{{ i.name }}</option>
               </ng-container>
             </select>
-
-            <!-- error block -->
-            <!-- <div class="invalid-feedback" *ngIf="isSubmitted && cityName.errors?.required">
-              <sup>*</sup>Please enter your city name
-            </div> -->
           </div>
+          <label for="question">Enter Question:</label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="question"
+            id="question"
+            placeholder="Type question here"
+          />
 
-          <!-- <div ngbDropdown class="d-inline-block mb-2">
-            <button class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>Select Question type</button>
-            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-              <button ngbDropdownItem>Checkbox</button>
-              <button ngbDropdownItem>Paragraph</button>
-            </div>
-          </div> -->
+          <!-- <button class="btn btn-danger" (click)="removeQuestionForm(empIndex)">Remove</button> -->
         </div>
       </div>
 
-      <div formArrayName="questionList">
-        <div *ngFor="let employee of getQuestionListFormArray().controls; let empIndex=index">
-          <div [formGroupName]="empIndex">
-            <div>
-              <input class="form-control" type="text" formControlName="questionDetail"
-                placeholder="Type question here" />
+      <div [formGroupName]="'answerGroup'">
+        <div
+          *ngIf="
+            questionForm.get('inputType').value === 'checkbox';
+            else briefAnswers
+          "
+        >
+          <label for="otherAnswer">Enter your Answer: </label>
+          <div class="form-group">
+            <input
+              type="text"
+              class="form-control"
+              id="otherAnswer"
+              formControlName="otherAnswer"
+            />
+          </div>
+          <div formArrayName="answerOptions">
+            <div
+              *ngFor="
+                let employee of getOptionFormArray()?.controls;
+                let empIndex = index
+              "
+            >
+              <div [formGroupName]="empIndex">
+                <div class="row my-2">
+                  <div class="col-8">
+                    <input
+                      class="form-control"
+                      type="text"
+                      [placeholder]="'Option ' + (empIndex + 1)"
+                      formControlName="options"
+                      placeholder="Add Answer Option"
+                    />
+                  </div>
 
-              <!-- <button class="btn btn-danger" (click)="removeQuestionForm(empIndex)">Remove</button> -->
-            </div>
-
-            <div class="mb-3" formArrayName="optionsList">
-              <div *ngFor="let skill of answerOptions(empIndex).controls; let skillIndex=index">
-                <div [formGroupName]="skillIndex">
-                  <div class="row my-2">
-                    <div class="col-8">
-                      <input class="form-control" type="text" formControlName="options"
-                        placeholder="Add Answer Option" />
-                    </div>
-
-                    <div class="col-4">
-                      <button class="btn btn-danger"
-                        (click)="removeAnswerOptionsSkill(empIndex,skillIndex)">Remove</button>
-                    </div>
+                  <div class="col-4">
+                    <button
+                      class="btn btn-danger"
+                      (click)="removeAnswerOptionsSkill(empIndex)"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-
             <div>
-              <a class="link cursor-pointer" (click)="addNewAnswerOptions(empIndex)">+ Add Answer
-                Option</a>
-              <!-- <button class="btn btn-primary" type="button" (click)="addNewAnswerOptions(empIndex)">+ Add Answer
-                Option</button> -->
-              <button class="btn btn-primary" type="button" (click)="removeAnswerOpetions()">Remove Answer
-                Option</button>
+              <a class="link cursor-pointer" (click)="addNewAnswerOptions()"
+                >+ Add Answer Option</a
+              >
             </div>
           </div>
         </div>
-        <!-- <button class="btn btn-primary" type="button" (click)="addQuestionList()">Add Employee</button> -->
+        <ng-template #briefAnswers>
+          <div class="form-group">
+            <label for="briefAnswer">Enter your Answer: </label>
+            <textarea
+              class="form-control"
+              id="briefAnswer"
+              formControlName="briefAnswer"
+            >
+            </textarea>
+          </div>
+        </ng-template>
       </div>
-
-      {{this.questionForm.value | json}}
-
       <br /><br />
     </form>
-
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="submitQuestion(modal)">Submit</button>
+    <button
+      type="button"
+      class="btn btn-outline-dark"
+      (click)="submitQuestion(modal)"
+    >
+      Submit
+    </button>
   </div>
 </ng-template>
 
-<button class="btn btn-lg btn-outline-primary" id="addNewQuestion" (click)="open(content)">Add New Question</button>
+<button
+  class="btn btn-lg btn-outline-primary"
+  id="addNewQuestion"
+  (click)="open(content)"
+>
+  Add New Question
+</button>
 
-<hr>
+<hr />
 
 <pre>{{ closeResult }}</pre>
 
-
-
-
 <h1>Angular Nested FormArray / Dynamic FormArray</h1>
-
-<!-- <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
-  <div formArrayName="questionList">
-    <div *ngFor="let employee of questionList().controls; let empIndex=index">
-      <div [formGroupName]="empIndex" >
-        {{empIndex}} First Name :
-        <input type="text" formControlName="firstName" />
-        Last Name:
-        <input type="text" formControlName="lastName" />
-
-        <button (click)="removeQuestionForm(empIndex)">Remove</button>
-
-        <div formArrayName="skills">
-          <div *ngFor="let skill of questionListkills(empIndex).controls; let skillIndex=index">
-            <div [formGroupName]="skillIndex">
-              {{skillIndex}} Skill :
-              <input type="text" formControlName="skill" />
-              Exp:
-              <input type="text" formControlName="exp" />
-
-              <button (click)="removeAnswerOptionsSkill(empIndex,skillIndex)">
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-        <button type="button" (click)="addNewAnswerOptions(empIndex)">
-          Add Skill
-        </button>
-      </div>
-    </div>
-    <button type="button" (click)="addQuestionList()">Add Employee</button>
-  </div>
-</form>
-
-{{this.questionForm.value | json}}
-
-<br /><br /> -->
-<!-- <a href="https://www.tektutorialshub.com/angular/nested-formarray-example-add-form-fields-dynamically/">Nested FormArray
-  / Dynamic FormArray</a> -->
 
 <router-outlet></router-outlet>

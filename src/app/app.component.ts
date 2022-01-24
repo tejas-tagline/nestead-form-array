@@ -5,30 +5,25 @@ import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, AfterViewInit {
-
   public inputType: any[] = [
     {
       id: 1,
-      name: 'checkbox'
+      name: 'checkbox',
     },
     {
       id: 2,
-      name: 'textarea'
-    }
+      name: 'textarea',
+    },
   ];
-
 
   // allQuestionListForm: FormGroup;
   questionForm: FormGroup;
   closeResult = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private modalService: NgbModal
-  ) { }
+  constructor(private fb: FormBuilder, private modalService: NgbModal) {}
 
   ngAfterViewInit(): void {
     // document.getElementById('addNewQuestion').click();
@@ -36,26 +31,46 @@ export class AppComponent implements OnInit, AfterViewInit {
     // this.addNewAnswerOptions(0);
   }
 
-
   ngOnInit(): void {
     // this.allQuestionListForm = this.fb.group({
     //   questionFormList: this.fb.array([])
     // });
 
     this.questionForm = this.fb.group({
-      inputType: new FormControl(''),
-      questionList: this.fb.array([])
+      inputType: ['checkbox'],
+      question: [null],
+      answerGroup: this.getCheckboxForm(),
     });
 
-    this.questionForm.valueChanges.subscribe(value => {
+    this.questionForm.get('inputType').valueChanges.subscribe((value) => {
       console.log('value', value);
-
-      if (value.inputType === 'checkbox') {
+      console.log(`this.fo`, this.questionForm)
+      if (value === 'checkbox') {
         console.log('checkbox');
-      } else if (value.inputType === 'textarea') {
-        this.removeAnswerOpetions();
-        console.log('textarea');
+        this.questionForm.removeControl('answerGroup')
+        this.questionForm.addControl('answerGroup', this.getCheckboxForm());
+      } else if (value === 'textarea') {
+        // this.removeAnswerOpetions();
+        this.questionForm.removeControl('answerGroup')
+        this.questionForm.addControl('answerGroup', this.getBriefAnswer());
       }
+    });
+  }
+
+  getOptionFormArray(): FormArray {
+    return this.questionForm.get('answerGroup').get('answerOptions') as FormArray;
+  }
+
+  getCheckboxForm() {
+    return this.fb.group({
+      answerOptions: this.fb.array([this.newAnswerOptions()]),
+      otherAnswer: [null],
+    });
+  }
+
+  getBriefAnswer() {
+    return this.fb.group({
+      briefAnswer: [''],
     });
   }
 
@@ -64,14 +79,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     return this.questionForm.get('questionList') as FormArray;
   }
 
-  // getAllQuestionListFormArray(): FormArray {
-  //   return this.allQuestionListForm.get('questionFormList') as FormArray;
-  // }
-
   newQuestionList(): FormGroup {
     return this.fb.group({
       questionDetail: '',
-      optionsList: this.fb.array([])
+      optionsList: this.fb.array([]),
     });
   }
 
@@ -80,13 +91,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   removeQuestionForm(empIndex: number): void {
-    this.getQuestionListFormArray().removeAt(empIndex);
+    // this.getQuestionListFormArray().removeAt(empIndex);
   }
 
   closeModal(modal): void {
     modal.dismiss('Cross click');
-    this.getQuestionListFormArray().clear();
-    this.getQuestionListFormArray().removeAt(this.getQuestionListFormArray().length - 1);
   }
 
   answerOptions(empIndex: number): FormArray {
@@ -97,7 +106,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   newAnswerOptions(): FormGroup {
     return this.fb.group({
-      options: ''
+      options: '',
     });
   }
 
@@ -105,14 +114,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     while (this.answerOptions(0).controls.length !== 0) {
       this.answerOptions(0).removeAt(0);
     }
+  };
+
+  addNewAnswerOptions(): void {
+    console.log(`getOptionFormArray()`, this.getOptionFormArray())
+    this.getOptionFormArray().push(this.newAnswerOptions());
   }
 
-  addNewAnswerOptions(empIndex: number): void {
-    this.answerOptions(empIndex).push(this.newAnswerOptions());
-  }
-
-  removeAnswerOptionsSkill(empIndex: number, skillIndex: number): void {
-    this.answerOptions(empIndex).removeAt(skillIndex);
+  removeAnswerOptionsSkill(empIndex: number): void {
+    this.getOptionFormArray().removeAt(empIndex);
   }
 
   // onSubmit(): void {
@@ -120,17 +130,19 @@ export class AppComponent implements OnInit, AfterViewInit {
   // }
   // questionList form arry end
 
-
   // Modal open and close handler start
   open(content): void {
-    this.addQuestionList();
-    this.addNewAnswerOptions(0);
+    // this.addQuestionList();
+    // this.addNewAnswerOptions(0);
 
-    this.modalService.open(content, { size: 'lg' }).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
+    this.modalService.open(content, { size: 'lg' }).result.then(
+      (result) => {
+        this.closeResult = `Closed with: ${result}`;
+      },
+      (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      }
+    );
   }
 
   private getDismissReason(reason: any): string {
