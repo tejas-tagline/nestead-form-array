@@ -1,6 +1,6 @@
 <h1>Angular Nested FormArray / Dynamic FormArray</h1>
 
-<div>
+<div class="p-3">
   <form [formGroup]="allQuestionListForm">
     <div formArrayName="questionArray">
       <div
@@ -9,15 +9,42 @@
           let qId = index
         "
       >
-        <div [formGroupName]="qId">
-          
-
+        <div class="mt-5" [formGroupName]="qId">
+          <h3>{{ getQuestionById(qId).question }}</h3>
+          <div class="form-group" *ngIf="getQuestionById(qId).inputType === 'checkbox'">
+              <ng-container
+                *ngFor="
+                  let item of getQuestionById(qId).answerGroup.answerOptions
+                "
+              >
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [value]="item.options"
+                    id="flexCheckDefault"
+                  />
+                  <label class="form-check-label" for="flexCheckDefault">
+                    {{ item.options }}
+                  </label>
+                </div>
+              </ng-container>
+            </div>
+            <div *ngIf="getQuestionById(qId).inputType == 'textarea'">
+              <textarea
+                class="form-control"
+                id="detailAnswer"
+                formControlName="briefAnswer"
+              >
+              </textarea>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
   </form>
 </div>
 
+<!-- Form-modal  -->
 <ng-template #content let-modal>
   <div class="d-flex justify-content-end pt-4 pe-4">
     <button
@@ -145,7 +172,5 @@
 </button>
 
 <hr />
-
-<pre>{{ closeResult }}</pre>
 
 <router-outlet></router-outlet>

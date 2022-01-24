@@ -20,10 +20,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   ];
 
   allQuestionListForm: FormGroup = this.fb.group({
-    questionArray: this.fb.array([])
+    questionArray: this.fb.array([]),
   });
   questionForm: FormGroup;
   closeResult = '';
+
+
+  questionArray = [];
 
   constructor(private fb: FormBuilder, private modalService: NgbModal) {}
 
@@ -31,36 +34,41 @@ export class AppComponent implements OnInit, AfterViewInit {
     // document.getElementById('addNewQuestion').click();
     // this.addQuestionList();
     // this.addNewAnswerOptions(0);
-  }
-
-  ngOnInit(): void {
-    this.questionForm = this.fb.group({
-      inputType: ['checkbox'],
-      question: [null],
-      answerGroup: this.getCheckboxForm(),
-    });
-
+    this.initForm();
     this.questionForm.get('inputType').valueChanges.subscribe((value) => {
-      console.log('value', value);
-      console.log(`this.fo`, this.questionForm)
+      console.log(`this.questionForm`, this.questionForm);
+      this.questionForm.removeControl('answerGroup');
       if (value === 'checkbox') {
         console.log('checkbox');
-        this.questionForm.removeControl('answerGroup')
         this.questionForm.addControl('answerGroup', this.getCheckboxForm());
-      } else if (value === 'textarea') {
-        // this.removeAnswerOpetions();
-        this.questionForm.removeControl('answerGroup')
+      } else {
         this.questionForm.addControl('answerGroup', this.getBriefAnswer());
       }
     });
   }
 
+  initForm() {
+    this.questionForm = this.fb.group({
+      inputType: ['checkbox'],
+      question: [null],
+      answerGroup: this.getCheckboxForm(),
+    });
+  }
+
+  ngOnInit(): void {}
+
   getOptionFormArray(): FormArray {
-    return this.questionForm.get('answerGroup').get('answerOptions') as FormArray;
+    return this.questionForm
+      .get('answerGroup')
+      .get('answerOptions') as FormArray;
   }
 
   getQuestionFormArray(): FormArray {
     return this.allQuestionListForm.get('questionArray') as FormArray;
+  }
+
+  getQuestionById(id: number) {
+    return this.questionArray[id];
   }
 
   getCheckboxForm() {
@@ -114,7 +122,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // };
 
   addNewAnswerOptions(): void {
-    console.log(`getOptionFormArray()`, this.getOptionFormArray())
+    console.log(`getOptionFormArray()`, this.getOptionFormArray());
     this.getOptionFormArray().push(this.newAnswerOptions());
   }
 
@@ -147,9 +155,15 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public submitQuestion(modal): void {
     const questionFormData = this.questionForm.value;
-    console.log('questionFormData', questionFormData);
-    this.getQuestionFormArray().push(this.questionForm)
-    console.log(`this.`, this.allQuestionListForm)
+    this.getQuestionFormArray().push(this.questionForm);
+    // this.questionForm.reset();
+    console.log(`this.`, this.getQuestionFormArray().value)
+
+    this.questionArray = this.getQuestionFormArray().value
+
+    this.initForm();
     modal.close('Save click');
   }
+
+  getData() {}
 }
