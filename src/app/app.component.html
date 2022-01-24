@@ -1,3 +1,23 @@
+<h1>Angular Nested FormArray / Dynamic FormArray</h1>
+
+<div>
+  <form [formGroup]="allQuestionListForm">
+    <div formArrayName="questionArray">
+      <div
+        *ngFor="
+          let question of getQuestionFormArray()?.controls;
+          let qId = index
+        "
+      >
+        <div [formGroupName]="qId">
+          
+
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
 <ng-template #content let-modal>
   <div class="d-flex justify-content-end pt-4 pe-4">
     <button
@@ -127,7 +147,5 @@
 <hr />
 
 <pre>{{ closeResult }}</pre>
-
-<h1>Angular Nested FormArray / Dynamic FormArray</h1>
 
 <router-outlet></router-outlet>

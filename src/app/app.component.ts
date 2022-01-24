@@ -19,7 +19,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     },
   ];
 
-  // allQuestionListForm: FormGroup;
+  allQuestionListForm: FormGroup = this.fb.group({
+    questionArray: this.fb.array([])
+  });
   questionForm: FormGroup;
   closeResult = '';
 
@@ -32,10 +34,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // this.allQuestionListForm = this.fb.group({
-    //   questionFormList: this.fb.array([])
-    // });
-
     this.questionForm = this.fb.group({
       inputType: ['checkbox'],
       question: [null],
@@ -61,6 +59,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     return this.questionForm.get('answerGroup').get('answerOptions') as FormArray;
   }
 
+  getQuestionFormArray(): FormArray {
+    return this.allQuestionListForm.get('questionArray') as FormArray;
+  }
+
   getCheckboxForm() {
     return this.fb.group({
       answerOptions: this.fb.array([this.newAnswerOptions()]),
@@ -74,11 +76,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // questionList form arry start
-  getQuestionListFormArray(): FormArray {
-    return this.questionForm.get('questionList') as FormArray;
-  }
-
   newQuestionList(): FormGroup {
     return this.fb.group({
       questionDetail: '',
@@ -86,9 +83,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
   }
 
-  addQuestionList(): void {
-    this.getQuestionListFormArray().push(this.newQuestionList());
-  }
+  // addQuestionList(): void {
+  //   this.getQuestionListFormArray().push(this.newQuestionList());
+  // }
 
   removeQuestionForm(empIndex: number): void {
     // this.getQuestionListFormArray().removeAt(empIndex);
@@ -98,11 +95,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     modal.dismiss('Cross click');
   }
 
-  answerOptions(empIndex: number): FormArray {
-    return this.getQuestionListFormArray()
-      .at(empIndex)
-      .get('optionsList') as FormArray;
-  }
+  // answerOptions(empIndex: number): FormArray {
+  //   return this.getQuestionListFormArray()
+  //     .at(empIndex)
+  //     .get('optionsList') as FormArray;
+  // }
 
   newAnswerOptions(): FormGroup {
     return this.fb.group({
@@ -110,11 +107,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
   }
 
-  removeAnswerOpetions = () => {
-    while (this.answerOptions(0).controls.length !== 0) {
-      this.answerOptions(0).removeAt(0);
-    }
-  };
+  // removeAnswerOpetions = () => {
+  //   while (this.answerOptions(0).controls.length !== 0) {
+  //     this.answerOptions(0).removeAt(0);
+  //   }
+  // };
 
   addNewAnswerOptions(): void {
     console.log(`getOptionFormArray()`, this.getOptionFormArray())
@@ -125,16 +122,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.getOptionFormArray().removeAt(empIndex);
   }
 
-  // onSubmit(): void {
-  //   console.log(this.questionForm.value);
-  // }
-  // questionList form arry end
-
   // Modal open and close handler start
   open(content): void {
-    // this.addQuestionList();
-    // this.addNewAnswerOptions(0);
-
     this.modalService.open(content, { size: 'lg' }).result.then(
       (result) => {
         this.closeResult = `Closed with: ${result}`;
@@ -159,7 +148,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   public submitQuestion(modal): void {
     const questionFormData = this.questionForm.value;
     console.log('questionFormData', questionFormData);
-    this.removeQuestionForm(0);
+    this.getQuestionFormArray().push(this.questionForm)
+    console.log(`this.`, this.allQuestionListForm)
     modal.close('Save click');
   }
 }
