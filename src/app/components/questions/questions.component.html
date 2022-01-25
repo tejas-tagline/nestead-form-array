@@ -1,0 +1,186 @@
+<h1>Angular Nested FormArray / Dynamic FormArray</h1>
+
+<div class="p-3">
+  <form [formGroup]="allQuestionListForm">
+    <div formArrayName="questionArray">
+      <div
+        *ngFor="
+          let question of getQuestionFormArray()?.controls;
+          let qId = index
+        "
+      >
+        <div class="mt-5" [formGroupName]="qId">
+          <h3>{{ getQuestionById(qId).question }}</h3>
+          <div
+            class="form-group"
+            *ngIf="getQuestionById(qId).inputType === 'checkbox'"
+          >
+            <ng-container
+              *ngFor="
+                let item of getQuestionById(qId).answerGroup.answerOptions
+              "
+            >
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [value]="item.options"
+                  (click)="checkBoxSelected(item.options, qId)"
+                />
+                <label class="form-check-label" for="flexCheckDefault">
+                  {{ item.options }}
+                </label>
+              </div>
+            </ng-container>
+          </div>
+          <div *ngIf="getQuestionById(qId).inputType == 'textarea'">
+            <textarea class="form-control" formControlName="usersAnswer">
+            </textarea>
+          </div>
+          <div class="float-left">
+            <div class="btn btn-success" (click)="verifyAnswer(qId)">
+              Verify Your answer
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Form-modal  -->
+<ng-template #content let-modal>
+  <div class="d-flex justify-content-end pt-4 pe-4">
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="closeModal(modal)"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <h4 class="mb-2">Add a New Question</h4>
+
+    <form [formGroup]="questionForm">
+      <div class="row">
+        <div class="col">
+          <div class="mb-3">
+            <select class="custom-select" formControlName="inputType">
+              <ng-container *ngFor="let i of inputType">
+                <option [ngValue]="i.name">{{ i.name }}</option>
+              </ng-container>
+            </select>
+          </div>
+          <label for="question">Enter Question:</label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="question"
+            id="question"
+            placeholder="Type question here"
+          />
+
+          <!-- <button class="btn btn-danger" (click)="removeQuestionForm(empIndex)">Remove</button> -->
+        </div>
+      </div>
+
+      <div [formGroupName]="'answerGroup'">
+        <div
+          *ngIf="
+            questionForm.get('inputType').value === 'checkbox';
+            else briefAnswers
+          "
+        >
+          <label for="otherAnswer">Enter your Answer: </label>
+          <div class="form-group">
+            <input
+              type="text"
+              class="form-control"
+              id="otherAnswer"
+              formControlName="otherAnswer"
+            />
+          </div>
+          <div formArrayName="answerOptions">
+            <div
+              *ngFor="
+                let employee of getOptionFormArray()?.controls;
+                let empIndex = index
+              "
+            >
+              <div [formGroupName]="empIndex">
+                <div class="row my-2">
+                  <div class="col-8">
+                    <input
+                      class="form-control"
+                      type="text"
+                      [placeholder]="'Option ' + (empIndex + 1)"
+                      formControlName="options"
+                      placeholder="Add Answer Option"
+                    />
+                  </div>
+
+                  <div class="col-3 p-1">
+                    Correct Answer?
+                    <input
+                    class="form-check-input"
+                    type="checkbox"
+                    formControlName="correctAnswer"
+                  />
+                  </div>
+                  <div class="col-1">
+                    <button
+                      class="btn btn-danger"
+                      (click)="removeAnswerOptionsSkill(empIndex)"
+                    >
+                      X
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <a class="link cursor-pointer" (click)="addNewAnswerOptions()"
+                >+ Add Answer Option</a
+              >
+            </div>
+          </div>
+        </div>
+        <ng-template #briefAnswers>
+          <div class="form-group">
+            <label for="briefAnswer">Enter your Answer: </label>
+            <textarea
+              class="form-control"
+              id="briefAnswer"
+              formControlName="briefAnswer"
+            >
+            </textarea>
+          </div>
+        </ng-template>
+      </div>
+      <br /><br />
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline-dark"
+      (click)="submitQuestion(modal)"
+    >
+      Submit
+    </button>
+  </div>
+</ng-template>
+
+<button
+  class="btn btn-lg btn-outline-primary"
+  id="addNewQuestion"
+  (click)="open(content)"
+>
+  Add New Question
+</button>
+
+<hr />
